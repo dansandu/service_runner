@@ -27,7 +27,7 @@ int main(const int argumentCount, const char* const* const arguments)
 
     const auto invoker = ServiceRegistry::getServiceInvoker(arguments[2]);
 
-    wrapInTryCatch(invoker, argumentCount - 2, arguments + 2);
+    wrapInTryCatch(invoker, argumentCount - 3, arguments + 3);
 
     return 0;
 }
