@@ -34,6 +34,10 @@ static void deleteImplementation(void* pointer)
     delete static_cast<Implementation*>(pointer);
 }
 
+DynamicLibrary::DynamicLibrary() : implementation_{nullptr, deleteImplementation}
+{
+}
+
 DynamicLibrary::DynamicLibrary(const std::wstring& filePath)
     : implementation_{new Implementation(filePath), deleteImplementation}
 {

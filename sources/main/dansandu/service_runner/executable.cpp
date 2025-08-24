@@ -14,6 +14,8 @@ using dansandu::service_runner::service_registry::ServiceRegistry;
 
 int main(const int argumentCount, const char* const* const arguments)
 {
+    auto library = DynamicLibrary{};
+
     try
     {
         if (argumentCount <= 1)
@@ -27,7 +29,7 @@ int main(const int argumentCount, const char* const* const arguments)
             return ErrorCode::serviceIdentifierNotSupplied;
         }
 
-        const auto testLibrary = DynamicLibrary{toWideString(arguments[1])};
+        library = DynamicLibrary{toWideString(arguments[1])};
 
         const auto invoker = ServiceRegistry::getServiceInvoker(arguments[2]);
 
