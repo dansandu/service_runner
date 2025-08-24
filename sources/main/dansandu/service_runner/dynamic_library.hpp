@@ -17,6 +17,8 @@ public:
 class PRALINE_EXPORT DynamicLibrary
 {
 public:
+    DynamicLibrary();
+
     explicit DynamicLibrary(const std::wstring& filePath);
 
 private:
