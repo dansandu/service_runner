@@ -8,10 +8,10 @@
 namespace dansandu::service_runner::dynamic_library
 {
 
-class CannotLoadLibraryException : public dansandu::journey::exception::Exception
+class CannotLoadLibraryException : public dansandu::journey::exception::WideException
 {
 public:
-    using Exception::Exception;
+    using WideException::WideException;
 };
 
 class PRALINE_EXPORT DynamicLibrary
