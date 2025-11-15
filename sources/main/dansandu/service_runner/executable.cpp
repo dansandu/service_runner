@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-using dansandu::journey::exception::Exception;
+using dansandu::journey::exception::WideException;
 using dansandu::journey::utility::toWideString;
 using dansandu::service_runner::dynamic_library::DynamicLibrary;
 using dansandu::service_runner::error_code::ErrorCode;
@@ -35,9 +35,9 @@ int main(const int argumentCount, const char* const* const arguments)
 
         return invoker(argumentCount - 3, arguments + 3);
     }
-    catch (const Exception& exception)
+    catch (const WideException& wideException)
     {
-        std::wcerr << "Wide exception was thrown with message: " << exception.message() << std::endl;
+        std::wcerr << "Wide exception was thrown with message: " << wideException.getMessage() << std::endl;
         return ErrorCode::wideExceptionThrown;
     }
     catch (const std::exception& exception)
