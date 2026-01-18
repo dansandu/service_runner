@@ -19,7 +19,7 @@ class PRALINE_EXPORT DynamicLibrary
 public:
     DynamicLibrary();
 
-    explicit DynamicLibrary(const std::wstring& filePath);
+    explicit DynamicLibrary(const std::string& filePath);
 
 private:
     using DeleterType = void (*)(void*);

@@ -1,49 +1,88 @@
 #include "dansandu/service_runner/dynamic_library.hpp"
 #include "dansandu/journey/logging.hpp"
+#include "dansandu/journey/utility.hpp"
 
 #include <string>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <windows.h>
+#elif defined(__linux__)
+#include <dlfcn.h>
 #endif
+
+using dansandu::journey::utility::toWideString;
 
 namespace dansandu::service_runner::dynamic_library
 {
 
-#ifdef _WIN32
-struct Implementation
+#if defined(_WIN32)
+class Implementation
 {
-    explicit Implementation(const std::wstring& filePath) : filePath{filePath}, library{LoadLibrary(filePath.c_str())}
+public:
+    explicit Implementation(const std::string& filePath)
+        : filePath_{toWideString(filePath)}, library_{LoadLibrary(filePath_.c_str())}
     {
-        if (library == NULL)
+        if (library_ == NULL)
         {
-            throw CannotLoadLibraryException{L"Couldn't load library at path '" + filePath + L"'"};
+            throw CannotLoadLibraryException{L"Couldn't load library at path '" + filePath_ + L"'"};
         }
-        LOG_INFO("Library '", filePath, "' was loaded");
+        LOG_INFO("Library '", filePath_, "' was loaded");
     }
 
     ~Implementation() noexcept
     {
-        LOG_INFO("Unloading library '", filePath, "'");
-        FreeLibrary(library);
+        LOG_INFO("Unloading library '", filePath_, "'");
+        FreeLibrary(library_);
     }
 
-    std::wstring filePath;
-    HMODULE library;
+    Implementation(const Implementation&) = delete;
+    Implementation(Implementation&&) noexcept = delete;
+    Implementation& operator=(const Implementation&) = delete;
+    Implementation& operator=(Implementation&&) noexcept = delete;
+
+private:
+    std::wstring filePath_;
+    HMODULE library_;
 };
+#elif defined(__linux__)
+class Implementation
+{
+public:
+    explicit Implementation(const std::string& filePath)
+        : filePath_{filePath}, library_{dlopen(filePath_.c_str(), RTLD_LAZY)}
+    {
+        if (library_ == NULL)
+        {
+            throw CannotLoadLibraryException{L"Couldn't load library at path '" + toWideString(filePath_) + L"'"};
+        }
+        LOG_INFO("Library '", filePath_, "' was loaded");
+    }
+
+    ~Implementation() noexcept
+    {
+        LOG_INFO("Unloading library '", filePath_, "'");
+        dlclose(library_);
+    }
+
+    Implementation(const Implementation&) = delete;
+    Implementation(Implementation&&) noexcept = delete;
+    Implementation& operator=(const Implementation&) = delete;
+    Implementation& operator=(Implementation&&) noexcept = delete;
+
+private:
+    std::string filePath_;
+    void* library_;
+};
+#else
+#error "Unknown platform"
 #endif
 
-static void deleteImplementation(void* pointer)
-{
-    delete static_cast<Implementation*>(pointer);
-}
-
-DynamicLibrary::DynamicLibrary() : implementation_{nullptr, deleteImplementation}
+DynamicLibrary::DynamicLibrary() : implementation_{nullptr, [](void*) {}}
 {
 }
 
-DynamicLibrary::DynamicLibrary(const std::wstring& filePath)
-    : implementation_{new Implementation(filePath), deleteImplementation}
+DynamicLibrary::DynamicLibrary(const std::string& filePath)
+    : implementation_{new Implementation(filePath), [](void* pointer) { delete static_cast<Implementation*>(pointer); }}
 {
 }
 
