@@ -29,7 +29,7 @@ int main(const int argumentCount, const char* const* const arguments)
             return ErrorCode::serviceIdentifierNotSupplied;
         }
 
-        library = DynamicLibrary{toWideString(arguments[1])};
+        library = DynamicLibrary{arguments[1]};
 
         const auto invoker = ServiceRegistry::getServiceInvoker(arguments[2]);
 
