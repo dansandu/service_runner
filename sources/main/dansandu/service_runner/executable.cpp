@@ -23,15 +23,24 @@ int main(const int argumentCount, const char* const* const arguments)
             std::cerr << "Aborting because no library file path was supplied to load." << std::endl;
             return ErrorCode::libraryPathNotSupplied;
         }
-        else if (argumentCount <= 2)
-        {
-            std::cerr << "Aborting because no service identifier was supplied." << std::endl;
-            return ErrorCode::serviceIdentifierNotSupplied;
-        }
 
         library = DynamicLibrary{arguments[1]};
 
-        const auto invoker = ServiceRegistry::getServiceInvoker(arguments[2]);
+        if (argumentCount <= 2)
+        {
+            std::cerr << "Aborting because no service identifier was supplied. Available services are:" << std::endl;
+
+            const auto serviceNames = ServiceRegistry::getGlobalInstance().getServiceNames();
+
+            for (const auto& serviceName : serviceNames)
+            {
+                std::cerr << "  " << serviceName << std::endl;
+            }
+
+            return ErrorCode::serviceIdentifierNotSupplied;
+        }
+
+        const auto invoker = ServiceRegistry::getGlobalInstance().getServiceInvoker(arguments[2]);
 
         return invoker(argumentCount - 3, arguments + 3);
     }
