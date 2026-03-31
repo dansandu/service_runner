@@ -8,9 +8,15 @@
 namespace dansandu::service_runner::service_registry
 {
 
-static std::map<std::string, ServiceRegistry::ServiceInvokerType> services;
+ServiceRegistry::ServiceRegistry()
+{
+}
 
-static std::mutex servicesMutex;
+ServiceRegistry& ServiceRegistry::getGlobalInstance()
+{
+    static auto serviceRegistry = ServiceRegistry{};
+    return serviceRegistry;
+}
 
 int ServiceRegistry::registerServiceInvoker(const std::string& serviceIdentifier,
                                             const ServiceInvokerType serviceInvoker)
@@ -34,6 +40,21 @@ ServiceRegistry::ServiceInvokerType ServiceRegistry::getServiceInvoker(const std
         throw std::logic_error{"no service was registered with identifier '" + identifier + "'"};
     }
     return position->second;
+}
+
+std::vector<std::string> ServiceRegistry::getServiceNames()
+{
+    const auto lock = std::lock_guard<std::mutex>(servicesMutex);
+
+    auto result = std::vector<std::string>{};
+    result.reserve(services.size());
+
+    for (const auto& entry : services)
+    {
+        result.push_back(entry.first);
+    }
+
+    return result;
 }
 
 }
