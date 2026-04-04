@@ -36,7 +36,7 @@ private:
 };
 
 #define DANSANDU_SERVICE_RUNNER_REGISTER_SERVICE(identifier, invoker)                                                  \
-    static int DANSANDU_JOURNEY_UNIQUE_NAME(dansandu_journey_service_registrar_) =                                     \
+    static int DANSANDU_JOURNEY_UNIQUE_NAME =                                                                          \
         dansandu::service_runner::service_registry::ServiceRegistry::getGlobalInstance().registerServiceInvoker(       \
             identifier, invoker)
 
