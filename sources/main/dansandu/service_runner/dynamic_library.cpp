@@ -1,4 +1,5 @@
 #include "dansandu/service_runner/dynamic_library.hpp"
+#include "dansandu/journey/exception.hpp"
 #include "dansandu/journey/logging.hpp"
 #include "dansandu/journey/utility.hpp"
 
@@ -19,12 +20,17 @@ namespace dansandu::service_runner::dynamic_library
 class Implementation
 {
 public:
+    Implementation(const Implementation&) = delete;
+    Implementation(Implementation&&) noexcept = delete;
+    Implementation& operator=(const Implementation&) = delete;
+    Implementation& operator=(Implementation&&) noexcept = delete;
+
     explicit Implementation(const std::string& filePath)
         : filePath_{toWideString(filePath)}, library_{LoadLibrary(filePath_.c_str())}
     {
         if (library_ == NULL)
         {
-            throw CannotLoadLibraryException{L"Couldn't load library at path '" + filePath_ + L"'"};
+            WTHROW(CannotLoadLibraryException, "Couldn't load library at path '", filePath_, L"'");
         }
         LOG_INFO("Library '", filePath_, "' was loaded");
     }
@@ -35,11 +41,6 @@ public:
         FreeLibrary(library_);
     }
 
-    Implementation(const Implementation&) = delete;
-    Implementation(Implementation&&) noexcept = delete;
-    Implementation& operator=(const Implementation&) = delete;
-    Implementation& operator=(Implementation&&) noexcept = delete;
-
 private:
     std::wstring filePath_;
     HMODULE library_;
@@ -48,12 +49,17 @@ private:
 class Implementation
 {
 public:
+    Implementation(const Implementation&) = delete;
+    Implementation(Implementation&&) noexcept = delete;
+    Implementation& operator=(const Implementation&) = delete;
+    Implementation& operator=(Implementation&&) noexcept = delete;
+
     explicit Implementation(const std::string& filePath)
         : filePath_{filePath}, library_{dlopen(filePath_.c_str(), RTLD_LAZY)}
     {
         if (library_ == NULL)
         {
-            throw CannotLoadLibraryException{L"Couldn't load library at path '" + toWideString(filePath_) + L"'"};
+            WTHROW(CannotLoadLibraryException, "Couldn't load library at path '", filePath_, "'");
         }
         LOG_INFO("Library '", filePath_, "' was loaded");
     }
@@ -63,11 +69,6 @@ public:
         LOG_INFO("Unloading library '", filePath_, "'");
         dlclose(library_);
     }
-
-    Implementation(const Implementation&) = delete;
-    Implementation(Implementation&&) noexcept = delete;
-    Implementation& operator=(const Implementation&) = delete;
-    Implementation& operator=(Implementation&&) noexcept = delete;
 
 private:
     std::string filePath_;

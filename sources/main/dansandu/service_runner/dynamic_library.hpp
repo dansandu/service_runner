@@ -17,6 +17,12 @@ public:
 class PRALINE_EXPORT DynamicLibrary
 {
 public:
+    DynamicLibrary(const DynamicLibrary&) = delete;
+    DynamicLibrary& operator=(const DynamicLibrary&) = delete;
+
+    DynamicLibrary(DynamicLibrary&&) noexcept = default;
+    DynamicLibrary& operator=(DynamicLibrary&&) noexcept = default;
+
     DynamicLibrary();
 
     explicit DynamicLibrary(const std::string& filePath);
