@@ -1,4 +1,5 @@
 #include "dansandu/service_runner/service_registry.hpp"
+#include "dansandu/journey/exception.hpp"
 
 #include <map>
 #include <mutex>
@@ -25,7 +26,7 @@ int ServiceRegistry::registerServiceInvoker(const std::string& serviceIdentifier
     const auto position = services.find(serviceIdentifier);
     if (position != services.end())
     {
-        throw std::logic_error{"identifier '" + serviceIdentifier + "' is used by another service"};
+        THROW(std::logic_error, "Identifier '", serviceIdentifier, "' is used by another service");
     }
     services.insert({serviceIdentifier, serviceInvoker});
     return 0;
@@ -37,7 +38,7 @@ ServiceRegistry::ServiceInvokerType ServiceRegistry::getServiceInvoker(const std
     const auto position = services.find(identifier);
     if (position == services.end())
     {
-        throw std::logic_error{"no service was registered with identifier '" + identifier + "'"};
+        THROW(std::logic_error, "No service was registered with identifier '", identifier, "'");
     }
     return position->second;
 }
