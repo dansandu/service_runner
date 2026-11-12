@@ -42,7 +42,7 @@ int main(const int argumentCount, const char* const* const arguments)
 
         const auto invoker = ServiceRegistry::getGlobalInstance().getServiceInvoker(arguments[2]);
 
-        return invoker(argumentCount - 3, arguments + 3);
+        return invoker(argumentCount, arguments);
     }
     catch (const WideException& wideException)
     {
