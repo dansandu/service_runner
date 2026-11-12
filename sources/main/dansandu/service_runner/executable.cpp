@@ -6,8 +6,6 @@
 
 #include <iostream>
 
-using dansandu::journey::exception::WideException;
-using dansandu::journey::utility::toWideString;
 using dansandu::service_runner::dynamic_library::DynamicLibrary;
 using dansandu::service_runner::error_code::ErrorCode;
 using dansandu::service_runner::service_registry::ServiceRegistry;
@@ -21,6 +19,7 @@ int main(const int argumentCount, const char* const* const arguments)
         if (argumentCount <= 1)
         {
             std::cerr << "Aborting because no library file path was supplied to load." << std::endl;
+
             return ErrorCode::libraryPathNotSupplied;
         }
 
@@ -28,9 +27,17 @@ int main(const int argumentCount, const char* const* const arguments)
 
         if (argumentCount <= 2)
         {
-            std::cerr << "Aborting because no service identifier was supplied. Available services are:" << std::endl;
-
             const auto serviceNames = ServiceRegistry::getGlobalInstance().getServiceNames();
+
+            if (serviceNames.empty())
+            {
+                std::cerr << "Aborting because no service identifier was supplied and no services are available."
+                          << std::endl;
+
+                return ErrorCode::serviceIdentifierNotSupplied;
+            }
+
+            std::cerr << "Aborting because no service identifier was supplied. Available services are:" << std::endl;
 
             for (const auto& serviceName : serviceNames)
             {
@@ -44,15 +51,17 @@ int main(const int argumentCount, const char* const* const arguments)
 
         return invoker(argumentCount, arguments);
     }
-    catch (const WideException& wideException)
-    {
-        std::wcerr << "Wide exception was thrown with message: " << wideException.getMessage() << std::endl;
-        return ErrorCode::wideExceptionThrown;
-    }
     catch (const std::exception& exception)
     {
-        std::cerr << "Ascii exception was thrown with message: " << exception.what() << std::endl;
-        return ErrorCode::asciiExceptionThrown;
+        std::cerr << "An exception was thrown with message: " << exception.what() << std::endl;
+
+        return ErrorCode::exceptionThrown;
+    }
+    catch (...)
+    {
+        std::cerr << "An unknown exception was thrown" << std::endl;
+
+        return ErrorCode::exceptionThrown;
     }
 
     return ErrorCode::none;

@@ -11,13 +11,11 @@
 #include <dlfcn.h>
 #endif
 
-using dansandu::journey::utility::toWideString;
-
 namespace dansandu::service_runner::dynamic_library
 {
 
 #if defined(_WIN32)
-class Implementation
+class DynamicLibrary::Implementation
 {
 public:
     Implementation(const Implementation&) = delete;
@@ -26,27 +24,29 @@ public:
     Implementation& operator=(Implementation&&) noexcept = delete;
 
     explicit Implementation(const std::string& filePath)
-        : filePath_{toWideString(filePath)}, library_{LoadLibrary(filePath_.c_str())}
+        : filePath_{filePath}, library_{::LoadLibraryA(filePath_.c_str())}
     {
         if (library_ == NULL)
         {
-            WTHROW(CannotLoadLibraryException, "Couldn't load library at path '", filePath_, L"'");
+            THROW(CannotLoadLibraryException, "Couldn't load library at path '", filePath_, "'");
         }
+
         LOG_INFO("Library '", filePath_, "' was loaded");
     }
 
     ~Implementation() noexcept
     {
         LOG_INFO("Unloading library '", filePath_, "'");
-        FreeLibrary(library_);
+
+        ::FreeLibrary(library_);
     }
 
 private:
-    std::wstring filePath_;
+    std::string filePath_;
     HMODULE library_;
 };
 #elif defined(__linux__)
-class Implementation
+class DynamicLibrary::Implementation
 {
 public:
     Implementation(const Implementation&) = delete;
@@ -55,19 +55,21 @@ public:
     Implementation& operator=(Implementation&&) noexcept = delete;
 
     explicit Implementation(const std::string& filePath)
-        : filePath_{filePath}, library_{dlopen(filePath_.c_str(), RTLD_LAZY)}
+        : filePath_{filePath}, library_{::dlopen(filePath_.c_str(), RTLD_LAZY)}
     {
         if (library_ == NULL)
         {
-            WTHROW(CannotLoadLibraryException, "Couldn't load library at path '", filePath_, "'");
+            THROW(CannotLoadLibraryException, "Couldn't load library at path '", filePath_, "'");
         }
+
         LOG_INFO("Library '", filePath_, "' was loaded");
     }
 
     ~Implementation() noexcept
     {
         LOG_INFO("Unloading library '", filePath_, "'");
-        dlclose(library_);
+
+        ::dlclose(library_);
     }
 
 private:
@@ -78,13 +80,17 @@ private:
 #error "Unknown platform"
 #endif
 
-DynamicLibrary::DynamicLibrary() : implementation_{nullptr, [](void*) {}}
+DynamicLibrary::DynamicLibrary() = default;
+
+DynamicLibrary::DynamicLibrary(const std::string& filePath)
+    : implementation_{std::make_unique<Implementation>(filePath)}
 {
 }
 
-DynamicLibrary::DynamicLibrary(const std::string& filePath)
-    : implementation_{new Implementation(filePath), [](void* pointer) { delete static_cast<Implementation*>(pointer); }}
-{
-}
+DynamicLibrary::DynamicLibrary(DynamicLibrary&&) noexcept = default;
+
+DynamicLibrary& DynamicLibrary::operator=(DynamicLibrary&&) noexcept = default;
+
+DynamicLibrary::~DynamicLibrary() noexcept = default;
 
 }

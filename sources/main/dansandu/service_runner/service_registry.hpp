@@ -35,9 +35,12 @@ private:
     std::mutex servicesMutex;
 };
 
-#define DANSANDU_SERVICE_RUNNER_REGISTER_SERVICE(identifier, invoker)                                                  \
-    static int DANSANDU_JOURNEY_UNIQUE_NAME =                                                                          \
-        dansandu::service_runner::service_registry::ServiceRegistry::getGlobalInstance().registerServiceInvoker(       \
-            identifier, invoker)
-
 }
+
+#define DANSANDU_SERVICE_RUNNER_REGISTER_SERVICE(identifier, invoker)                                                  \
+    namespace                                                                                                          \
+    {                                                                                                                  \
+    const auto DANSANDU_JOURNEY_UNIQUE_NAME =                                                                          \
+        ::dansandu::service_runner::service_registry::ServiceRegistry::getGlobalInstance().registerServiceInvoker(     \
+            identifier, invoker);                                                                                      \
+    }
