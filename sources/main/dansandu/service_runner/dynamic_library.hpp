@@ -8,29 +8,33 @@
 namespace dansandu::service_runner::dynamic_library
 {
 
-class CannotLoadLibraryException : public dansandu::journey::exception::WideException
+class CannotLoadLibraryException : public dansandu::journey::exception::Exception
 {
 public:
-    using WideException::WideException;
+    using Exception::Exception;
 };
 
 class PRALINE_EXPORT DynamicLibrary
 {
 public:
     DynamicLibrary(const DynamicLibrary&) = delete;
+
     DynamicLibrary& operator=(const DynamicLibrary&) = delete;
 
-    DynamicLibrary(DynamicLibrary&&) noexcept = default;
-    DynamicLibrary& operator=(DynamicLibrary&&) noexcept = default;
+    DynamicLibrary(DynamicLibrary&&) noexcept;
+
+    DynamicLibrary& operator=(DynamicLibrary&&) noexcept;
 
     DynamicLibrary();
 
     explicit DynamicLibrary(const std::string& filePath);
 
-private:
-    using DeleterType = void (*)(void*);
+    ~DynamicLibrary() noexcept;
 
-    std::unique_ptr<void, DeleterType> implementation_;
+private:
+    class Implementation;
+
+    std::unique_ptr<Implementation> implementation_;
 };
 
 }
